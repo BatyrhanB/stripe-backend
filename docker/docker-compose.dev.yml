@@ -44,6 +44,13 @@ services:
       - main-network
       - nginx-network
 
+  stripe-cli:
+    image: stripe/stripe-cli:latest
+    container_name: stripe-cli
+    command: "listen --api-key ${STRIPE_API_KEY} --device-name ${STRIPE_DEVICE_NAME} --forward-to stripe_back:8000/payment/webhook/"
+    env_file:
+      - ../src/.env
+
   nginx:
     image: nginx:1.13
     container_name: stripe_nginx

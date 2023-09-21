@@ -18,3 +18,5 @@ Pillow==10.0.1
 attrs==22.1.0
 
 gunicorn==21.2.0
+
+stripe==6.5.0
