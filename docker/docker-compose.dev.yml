@@ -1,0 +1,67 @@
+version: '3.9'
+
+services:
+  stripe_back: 
+    container_name: stripe_back
+    tty: true
+    build: ..
+    volumes:
+      - ../../stripe-backend:/opt/services/stripe-backend/
+      - ../back_static:/opt/services/stripe-backend/back_static/
+      - ../back_media:/opt/services/stripe-backend/back_media/
+    entrypoint: "sh /opt/services/stripe-backend/scripts/wsgi_server.sh"
+    ports:
+      - "8000:8000"
+    networks:
+      - main-network
+      - nginx-network
+
+  db:
+    image: postgres:15-alpine
+    container_name: stripe_database
+    restart: unless-stopped
+    volumes:
+      - ../server/postgres/data:/var/lib/postgresql/data
+    networks:
+      - main-network
+    env_file:
+      - ../src/.env
+    ports:
+      - "5432:5432"
+
+  redis:
+    restart: always
+    image: redis:alpine
+    container_name: stripe_redis
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+    ports:  
+    - "6379:6379"
+    networks:
+      - main-network
+      - nginx-network
+
+  nginx:
+    image: nginx:1.13
+    container_name: stripe_nginx
+    restart: unless-stopped
+    ports:
+      - 80:80
+    volumes:
+      - ../config/nginx/conf.d.dev:/etc/nginx/conf.d
+      - ../back_static:/opt/services/stripe-backend/back_static/
+      - ../back_media:/opt/services/stripe-backend/back_media/
+    networks:
+      - nginx-network
+      - main-network
+
+networks:
+  nginx-network:
+    driver: bridge
+  db-network:
+    driver: bridge
+  main-network:
+    driver: bridge
