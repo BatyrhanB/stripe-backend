@@ -1,0 +1,101 @@
+<!-- buy_item.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ item.name }}</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background: #50b3a2;
+            color: #ffffff;
+            text-align: center;
+            padding: 1em;
+        }
+        container {
+            margin: 2em;
+            padding: 2em;
+            background: #ffffff;
+            display: flex;
+        }
+        p {
+            margin-bottom: 1em;
+        }
+        button {
+            font-size: 16px;
+            color: #fff;
+            background: #e8491d;
+            padding: 10px 20px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+        }
+        ul {
+            margin: 0 auto;
+            max-width: 800px;
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        li {
+            width: calc(100% / 3 - 30px);
+            background: #c1f7ff;
+            border-radius: 8px;
+            padding: 12px;
+        }
+        h1 {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Product catalog</h1>
+    <div class="container">
+        <ul id="products">
+            
+        </ul>
+    </div>
+    <script src="https://js.stripe.com/v3/"></script>
+    <script type="text/javascript">
+        const getProduct = async () => {
+            const res = await fetch('http://0.0.0.0:8000/api/item/list/');
+            const products = await res.json();
+            const listOfPRoducts = document.getElementById('products');
+            products.results.forEach(product => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <h3>${product.name}</h3>
+                    <p>${product.description}</p>
+                    <p>${product.price}</p>
+                    <button data-item-id="${product.id}" class="buy-button">Buy</button>
+                `;
+                listOfPRoducts.appendChild(li);
+            });
+        }
+
+        getProduct().then(() => {
+            const stripe = Stripe("pk_test_51NsgcIHPiln4ZZ3nZMZuOvh1LpXUJqyqUeRr94fbpGSUelfwJVoOnVTerGanudD0NAxxDec9Hu9JsanYFPjHVijV002qCvsQcV");
+            var buyButtons = document.getElementsByClassName('buy-button');
+            [...buyButtons].forEach(btn => {
+                btn.addEventListener('click', function() {
+                    stripe.redirectToCheckout({ sessionId: "cs_test_b1a1d1D5CGXSepF3vGjlMI0VmTDNT0VsFJDjKBWc7i2oAhqmyLsfkk8cYZ" })
+                    /*var itemId = btn.getAttribute('data-item-id');
+                    const url = `http://0.0.0.0:8000/api/buy/${itemId}`;
+                    console.log(url)
+                    fetch(url, {method: 'GET'})
+                        .then(response => response.json())
+                        .then(session => stripe.redirectToCheckout({ sessionId: "cs_test_b1a1d1D5CGXSepF3vGjlMI0VmTDNT0VsFJDjKBWc7i2oAhqmyLsfkk8cYZ" }))*/
+                        .catch(error => console.error('There was an error redirecting to Stripe:', error));
+                });
+            })
+        });
+    </script>
+</body>
+</html>

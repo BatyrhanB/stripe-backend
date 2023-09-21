@@ -15,6 +15,7 @@ PRODUCTION = config("PRODUCTION", default=False, cast=bool)
 
 LOCAL_APPS = [
     "common.apps.CommonConfig",
+    "item.apps.ItemConfig",
 ]
 
 THIRD_PARTY_APPS = [
@@ -70,6 +71,8 @@ TEMPLATES = [
         },
     },
 ]
+
+STRIPE_SECRET_KEY = config("STRIPE_API_KEY")
 
 WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"
