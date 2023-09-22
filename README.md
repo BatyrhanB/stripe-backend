@@ -37,6 +37,9 @@ API  для отображения шаблона со списком товар
 
 Admin panel на сервере
   - URL: http://134.122.75.14:8080/admin/
+  - Login: admin
+  - Password: admin
+  - Примичание: если в API получение stripe session id приходит 403, то выйдите из сесси админки или очистите куки
 
 Swagger API на сервере
   - URL: http://134.122.75.14:8080/swagger/
