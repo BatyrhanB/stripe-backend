@@ -73,6 +73,8 @@ TEMPLATES = [
 ]
 
 STRIPE_SECRET_KEY = config("STRIPE_API_KEY")
+STRIPE_SUCCESS_URL= config("STRIPE_SUCCESS_URL")
+STRIPE_CANCEL_URL = config("STRIPE_CANCEL_URL")
 
 WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"

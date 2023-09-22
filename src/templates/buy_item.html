@@ -1,9 +1,8 @@
-<!-- buy_item.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{{ item.name }}</title>
+    <title>Product Catalog</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -23,10 +22,18 @@
             background: #ffffff;
             display: flex;
         }
+        #cart-container {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background: #fff;
+            position: relative;
+        }
         p {
             margin-bottom: 1em;
         }
         button {
+            border-radius: 8px;
             font-size: 16px;
             color: #fff;
             background: #e8491d;
@@ -44,7 +51,7 @@
             flex-wrap: wrap;
             gap: 8px;
         }
-        li {
+        li {            
             width: calc(100% / 3 - 30px);
             background: #c1f7ff;
             border-radius: 8px;
@@ -53,49 +60,119 @@
         h1 {
             text-align: center;
         }
+        .cart-item {
+            display: flex; justify-content: space-between;
+            align-items: center;
+        }
+        #checkout-button {
+            background: #17B169;
+            color: #000;
+        }
+        .add-to-cart-button {
+            background: #7CB9E8;
+            color: #000;
+        }
+        #checkout-button {
+            position: absolute;
+            right: 100px;
+            top: 20px;
+
+        }
     </style>
 </head>
 <body>
     <h1>Product catalog</h1>
     <div class="container">
-        <ul id="products">
-            
-        </ul>
+        <ul id="products"></ul>
+    </div>
+    <div id="cart-container">
+        <h2>Cart</h2>
+        <ul id="cart-list"></ul>
+        <button id="checkout-button">Buy</button>
     </div>
     <script src="https://js.stripe.com/v3/"></script>
     <script type="text/javascript">
+        const stripe = Stripe("pk_test_51NsgcIHPiln4ZZ3nZMZuOvh1LpXUJqyqUeRr94fbpGSUelfwJVoOnVTerGanudD0NAxxDec9Hu9JsanYFPjHVijV002qCvsQcV");
+
+        const cart = [];
+
+        const addToCart = (itemId) => {
+            if (!cart.includes(itemId)) {
+                cart.push(itemId);
+                renderCart();
+            }
+        }
+
+        const renderCart = () => {
+            const cartList = document.getElementById('cart-list');
+            cartList.innerHTML = '';
+            cart.forEach(itemId => {
+                const product = products.results.find(product => product.id === itemId);
+                if (!product) return;
+
+                const li = document.createElement('li');
+                li.classList.add('cart-item');
+                const productInfo = document.createElement('span');
+                productInfo.innerHTML = (`${product.name} - ${product.price}`)
+                li.appendChild(productInfo);
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.innerHTML = 'Delete';
+                deleteBtn.addEventListener('click', () => {
+                    cart.splice(cart.indexOf(itemId), 1);
+                    renderCart();
+                });
+                li.appendChild(deleteBtn);
+                cartList.appendChild(li);
+            });
+        }
+
+        document.addEventListener('click', function (e) {
+            if (e.target && e.target.className === 'add-to-cart-button') {
+                const itemId = e.target.getAttribute('data-item-id');
+                addToCart(itemId);
+            }
+        });
+
+        document.getElementById('checkout-button').addEventListener('click', function () {
+            const url = 'http://0.0.0.0:8000/api/buy/';
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ items: cart }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.session_id) {
+                        stripe.redirectToCheckout({ sessionId: data.session_id })
+                            .catch(error => console.error('There was an error redirecting to Stripe:', error));
+                    } else {
+                        console.error('No session_id received');
+                    }
+                })
+                .catch(error => console.error('There was an error with the fetch operation:', error));
+        });
+
         const getProduct = async () => {
             const res = await fetch('http://0.0.0.0:8000/api/item/list/');
-            const products = await res.json();
-            const listOfPRoducts = document.getElementById('products');
+            products = await res.json();
+            const listOfProducts = document.getElementById('products');
             products.results.forEach(product => {
                 const li = document.createElement('li');
                 li.innerHTML = `
                     <h3>${product.name}</h3>
                     <p>${product.description}</p>
                     <p>${product.price}</p>
-                    <button data-item-id="${product.id}" class="buy-button">Buy</button>
+                    <button data-item-id="${product.id}" class="add-to-cart-button">Add to cart</button>
                 `;
-                listOfPRoducts.appendChild(li);
+                listOfProducts.appendChild(li);
             });
         }
 
-        getProduct().then(() => {
-            const stripe = Stripe("pk_test_51NsgcIHPiln4ZZ3nZMZuOvh1LpXUJqyqUeRr94fbpGSUelfwJVoOnVTerGanudD0NAxxDec9Hu9JsanYFPjHVijV002qCvsQcV");
-            var buyButtons = document.getElementsByClassName('buy-button');
-            [...buyButtons].forEach(btn => {
-                btn.addEventListener('click', function() {
-                    stripe.redirectToCheckout({ sessionId: "cs_test_b1a1d1D5CGXSepF3vGjlMI0VmTDNT0VsFJDjKBWc7i2oAhqmyLsfkk8cYZ" })
-                    /*var itemId = btn.getAttribute('data-item-id');
-                    const url = `http://0.0.0.0:8000/api/buy/${itemId}`;
-                    console.log(url)
-                    fetch(url, {method: 'GET'})
-                        .then(response => response.json())
-                        .then(session => stripe.redirectToCheckout({ sessionId: "cs_test_b1a1d1D5CGXSepF3vGjlMI0VmTDNT0VsFJDjKBWc7i2oAhqmyLsfkk8cYZ" }))*/
-                        .catch(error => console.error('There was an error redirecting to Stripe:', error));
-                });
-            })
-        });
+        let products;
+        getProduct();
     </script>
 </body>
 </html>
