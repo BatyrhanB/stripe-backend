@@ -10,7 +10,7 @@ class StripeSessionService(object):
     """
     Service for interacting with Stripe API to create sessions for items
     """
-    
+
     __secret_key: str = settings.STRIPE_SECRET_KEY
     __item_model: Item = Item
 
@@ -18,7 +18,7 @@ class StripeSessionService(object):
     def _generate_price_data(cls, items: List[Item]) -> List[Dict]:
         """
         Generates price data dictionary for each item in the items list
-        
+
         :param items: List of Item objects for which to generate price data
         :return: List of dictionaries containing price data for each item
         """
@@ -43,7 +43,7 @@ class StripeSessionService(object):
     def _get_items_by_ids(cls, item_ids: List[int]) -> List[Item]:
         """
         Retrieves items from the database by their ids
-        
+
         :param item_ids: List of ids of the items to retrieve
         :return: List of Item objects corresponding to the given ids
         """
@@ -54,7 +54,7 @@ class StripeSessionService(object):
     def get_session(cls, items_ids: List[int]) -> str:
         """
         Creates a Stripe checkout session and returns its id
-        
+
         :param items_ids: List of ids of the items to include in the session
         :return: Id of the created Stripe checkout session
         """
@@ -67,6 +67,6 @@ class StripeSessionService(object):
             line_items=price_data,
             mode="payment",
             success_url=settings.STRIPE_SUCCESS_URL,
-            cancel_url=settings.STRIPE_CANCEL_URL, 
+            cancel_url=settings.STRIPE_CANCEL_URL,
         )
         return session.id

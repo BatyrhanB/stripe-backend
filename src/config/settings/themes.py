@@ -6,16 +6,16 @@ JAZZMIN_SETTINGS = {
     "site_icon": "/assets/icons/admin_logo.svg",
     "welcome_sign": "Добро пожаловать в панель администратора сайта Stripe!",
     "copyright": "Batyrhan",
-    #"search_model": "user.User",
-    #"user_avatar": "None",
+    # "search_model": "user.User",
+    # "user_avatar": "None",
     "topmenu_links": [
         {"name": "Главная", "url": "admin:index", "permissions": ["auth.view_user"]},
     ],
-    #"usermenu_links": [
-        #{
-            #"model": "user.User",
-        #},
-    #],
+    # "usermenu_links": [
+    #     {
+    #         "model": "user.User",
+    #     },
+    # ],
     "show_sidebar": True,
     "navigation_expanded": True,
     "hide_apps": [],
@@ -24,7 +24,7 @@ JAZZMIN_SETTINGS = {
         "user.User": "fas fa-user",
     },
     "order_with_respect_to": [
-        #"user",
+        # "user",
         "common",
     ],
     "default_icon_parents": "fas fa-chevron-circle-right",
